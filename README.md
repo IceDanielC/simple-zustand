@@ -13,4 +13,4 @@
 
 测试可以直接发npm包
 
-后续可以考虑使用rollup打包，或者使用monorepo使用`workspace: *`来引入测试
+后续可以考虑使用tsup打包，或者使用monorepo使用`workspace: *`来引入测试
