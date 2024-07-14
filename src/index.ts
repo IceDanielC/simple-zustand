@@ -1,16 +1,26 @@
 import { useSyncExternalStore } from "react";
+import {
+  CreatorFn,
+  Destroy,
+  GetFn,
+  Listener,
+  Selector,
+  SetFn,
+  Store,
+  Subscriber,
+} from "./types";
 
 /**
  *
  * @param {*} createState 等于是用户传入的creator函数：create((set, get, store) => ({...}))
  * @returns store
  */
-const createStore = (createState) => {
-  let state;
-  const listeners = new Set();
+const createStore = (createState: CreatorFn): Store => {
+  let state: any;
+  const listeners = new Set<Listener>();
 
   /** 对应creator中的set api */
-  const setState = (partial, replace) => {
+  const setState: SetFn = (partial, replace) => {
     /** 首先修改state的值 */
     const nextState = typeof partial === "function" ? partial(state) : partial;
 
@@ -32,14 +42,14 @@ const createStore = (createState) => {
   };
 
   /** 同理对应 get api */
-  const getState = () => state;
+  const getState: GetFn = () => state;
 
-  const subscribe = (listener) => {
+  const subscribe: Subscriber = (listener: Listener) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
 
-  const destroy = () => {
+  const destroy: Destroy = () => {
     listeners.clear();
   };
 
@@ -58,7 +68,7 @@ const createStore = (createState) => {
  * @param {*} selector 用户传入的获取store中某个属性的函数，接收一个参数就是state对象
  * @returns
  */
-function useStore(api, selector) {
+function useStore(api: Store, selector: Selector) {
   // const [, triggerRender] = useState(0);
   // useEffect(() => {
   //   api.subscribe((state, prevState) => {
@@ -72,7 +82,7 @@ function useStore(api, selector) {
   //   });
   // }, []);
   // return selector(api.getState());
-  useSyncExternalStore(api.subscribe, () => selector(api.getState()));
+  return useSyncExternalStore(api.subscribe, () => selector(api.getState()));
 }
 
 /**
@@ -80,11 +90,11 @@ function useStore(api, selector) {
  * @param {*} createState 用户传入，有三个参数：set，get，store
  * @returns
  */
-export const create = (createState) => {
+export const create = (createState: CreatorFn) => {
   /** 通过用户传入的creator方法的返回值创建state，并导出state的getter和setter */
   const api = createStore(createState);
 
-  const useBoundStore = (selector) => useStore(api, selector);
+  const useBoundStore = (selector: Selector) => useStore(api, selector);
 
   Object.assign(useBoundStore, api);
 
