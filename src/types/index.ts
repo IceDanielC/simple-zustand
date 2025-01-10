@@ -4,10 +4,7 @@ export type GetFn = () => any;
 
 export type SetFn<T> = (state: SetPartial<T>, replace?: boolean) => void;
 
-type SetPartial<T> =
-  | T
-  | Partial<T>
-  | ((state: T) => T | Partial<T>);
+type SetPartial<T> = T | Partial<T> | ((state: T) => T | Partial<T>);
 
 export type Listener<T> = (state: T, previousState: T) => void;
 
@@ -22,4 +19,6 @@ export type Store<T> = {
   destroy: Destroy;
 };
 
-export type Selector<T> = (state: T) => any;
+export type Selector<T extends Record<string, any>> = (
+  state: T
+) => ReturnType<(typeof state)[keyof T]> | T;

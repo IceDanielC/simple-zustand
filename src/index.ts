@@ -22,7 +22,8 @@ const createStore = <T>(createState: CreatorFn<T>): Store<T> => {
   /** 对应creator中的set api */
   const setState: SetFn<T> = (partial, replace) => {
     /** 首先修改state的值 */
-    const nextState = typeof partial === "function" ? (partial as Function)(state) : partial;
+    const nextState =
+      typeof partial === "function" ? (partial as Function)(state) : partial;
 
     if (!Object.is(nextState, state)) {
       const previousState = state;
@@ -71,7 +72,10 @@ const createStore = <T>(createState: CreatorFn<T>): Store<T> => {
  * @param {*} selector 用户传入的获取store中某个属性的函数，接收一个参数就是state对象
  * @returns
  */
-function useStore<T>(api: Store<T>, selector: Selector<T>) {
+function useStore<T extends Record<string, any>>(
+  api: Store<T>,
+  selector: Selector<T>
+) {
   // const [, triggerRender] = useState(0);
   // useEffect(() => {
   //   api.subscribe((state, prevState) => {
@@ -93,7 +97,9 @@ function useStore<T>(api: Store<T>, selector: Selector<T>) {
  * @param {*} createState 用户传入，有三个参数：set，get，store
  * @returns
  */
-export const create = <T>(createState: CreatorFn<T>) => {
+export const create = <T extends Record<string, any>>(
+  createState: CreatorFn<T>
+) => {
   /** 通过用户传入的creator方法的返回值创建state，并导出state的getter和setter */
   const api = createStore<T>(createState);
 

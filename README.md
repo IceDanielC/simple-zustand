@@ -1,6 +1,9 @@
 # simple-zustand
 简易的zustand状态管理库的实现
 
+### 0.2.7
+- 修复useStore返回值类型
+
 ### 0.2.6
 - React19正式版，类型完善
 
