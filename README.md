@@ -1,6 +1,9 @@
 # simple-zustand
 简易的zustand状态管理库的实现
 
+### 0.2.6
+- React19正式版，类型完善
+
 ### 0.2.3
 - 迁移ts并使用tsup打包
 
