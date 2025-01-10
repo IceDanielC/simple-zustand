@@ -15,14 +15,14 @@ import {
  * @param {*} createState 等于是用户传入的creator函数：create((set, get, store) => ({...}))
  * @returns store
  */
-const createStore = (createState: CreatorFn): Store => {
-  let state: any;
-  const listeners = new Set<Listener>();
+const createStore = <T>(createState: CreatorFn<T>): Store<T> => {
+  let state: T;
+  const listeners = new Set<Listener<T>>();
 
   /** 对应creator中的set api */
-  const setState: SetFn = (partial, replace) => {
+  const setState: SetFn<T> = (partial, replace) => {
     /** 首先修改state的值 */
-    const nextState = typeof partial === "function" ? partial(state) : partial;
+    const nextState = typeof partial === "function" ? (partial as Function)(state) : partial;
 
     if (!Object.is(nextState, state)) {
       const previousState = state;
@@ -39,12 +39,15 @@ const createStore = (createState: CreatorFn): Store => {
       // 这里其实就是执行更新逻辑
       listeners.forEach((listener) => listener(state, previousState));
     }
+
+    // 如果新旧两个state相同就不更新了
+    return;
   };
 
   /** 同理对应 get api */
   const getState: GetFn = () => state;
 
-  const subscribe: Subscriber = (listener: Listener) => {
+  const subscribe: Subscriber<T> = (listener: Listener<T>) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
@@ -68,7 +71,7 @@ const createStore = (createState: CreatorFn): Store => {
  * @param {*} selector 用户传入的获取store中某个属性的函数，接收一个参数就是state对象
  * @returns
  */
-function useStore(api: Store, selector: Selector) {
+function useStore<T>(api: Store<T>, selector: Selector<T>) {
   // const [, triggerRender] = useState(0);
   // useEffect(() => {
   //   api.subscribe((state, prevState) => {
@@ -90,11 +93,11 @@ function useStore(api: Store, selector: Selector) {
  * @param {*} createState 用户传入，有三个参数：set，get，store
  * @returns
  */
-export const create = (createState: CreatorFn) => {
+export const create = <T>(createState: CreatorFn<T>) => {
   /** 通过用户传入的creator方法的返回值创建state，并导出state的getter和setter */
-  const api = createStore(createState);
+  const api = createStore<T>(createState);
 
-  const useBoundStore = (selector: Selector) => useStore(api, selector);
+  const useBoundStore = (selector: Selector<T>) => useStore(api, selector);
 
   Object.assign(useBoundStore, api);
 

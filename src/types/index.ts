@@ -1,32 +1,25 @@
-export type CreatorFn = (set: SetFn, get: GetFn, store: Store) => CustomStore;
-
-type CustomStore = { [key: string]: any };
+export type CreatorFn<T> = (set: SetFn<T>, get: GetFn, store: Store<T>) => T;
 
 export type GetFn = () => any;
 
-export type SetFn = (state: SetPartial, replace?: boolean) => void;
+export type SetFn<T> = (state: SetPartial<T>, replace?: boolean) => void;
 
-type SetPartial =
-  | CustomStore
-  | ((state: CustomStore) => void)
-  | Array<any>
-  | string
-  | undefined
-  | number
-  | boolean
-  | null;
+type SetPartial<T> =
+  | T
+  | Partial<T>
+  | ((state: T) => T | Partial<T>);
 
-export type Listener = (state: CustomStore, previousState: CustomStore) => void;
+export type Listener<T> = (state: T, previousState: T) => void;
 
-export type Subscriber = (listener: Listener) => () => void;
+export type Subscriber<T> = (listener: Listener<T>) => () => void;
 
 export type Destroy = () => void;
 
-export type Store = {
-  setState: SetFn;
+export type Store<T> = {
+  setState: SetFn<T>;
   getState: GetFn;
-  subscribe: Subscriber;
+  subscribe: Subscriber<T>;
   destroy: Destroy;
 };
 
-export type Selector = (state: CustomStore) => any;
+export type Selector<T> = (state: T) => any;
