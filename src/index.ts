@@ -4,7 +4,6 @@ import {
   Destroy,
   GetFn,
   Listener,
-  Selector,
   SetFn,
   Store,
   Subscriber,
@@ -38,6 +37,7 @@ const createStore = <T>(createState: CreatorFn<T>): Store<T> => {
         state = nextState;
       }
       // 这里其实就是执行更新逻辑
+      // listeners.forEach((listener) => listener()); // 这样写也行
       listeners.forEach((listener) => listener(state, previousState));
     }
 
@@ -66,15 +66,16 @@ const createStore = <T>(createState: CreatorFn<T>): Store<T> => {
   return api;
 };
 
+const identity = <T>(arg: T): T => arg;
 /**
  * 通过用户传入selector返回对应的store中的值，并订阅，保证试图的响应式更新
  * @param {*} api storeApi
  * @param {*} selector 用户传入的获取store中某个属性的函数，接收一个参数就是state对象
  * @returns
  */
-function useStore<T extends Record<string, any>>(
+function useStore<T extends Record<string, any>, StateSlice>(
   api: Store<T>,
-  selector: Selector<T>
+  selector: (state: T) => StateSlice = identity as any
 ) {
   // const [, triggerRender] = useState(0);
   // useEffect(() => {
@@ -103,7 +104,9 @@ export const create = <T extends Record<string, any>>(
   /** 通过用户传入的creator方法的返回值创建state，并导出state的getter和setter */
   const api = createStore<T>(createState);
 
-  const useBoundStore = (selector: Selector<T>) => useStore(api, selector);
+  // 添加泛型参数U来保留selector的返回值类型
+  const useBoundStore = <U>(selector: (state: T) => U) =>
+    useStore(api, selector);
 
   Object.assign(useBoundStore, api);
 
